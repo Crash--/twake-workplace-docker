@@ -13,7 +13,7 @@ services:
       - twake-network
 
   synapse:
-    image: matrixdotorg/synapse:v1.160.0
+    image: matrixdotorg/synapse:v1.163.0
     restart: unless-stopped
     user: "root"
     entrypoint: ["/bin/sh", "-c", "update-ca-certificates && exec /start.py"]
@@ -70,7 +70,7 @@ services:
       - "traefik.http.routers.tomfromchat.priority=100" 
 
   tom-bridge-init:
-    image: matrixdotorg/synapse:v1.160.0
+    image: matrixdotorg/synapse:v1.163.0
     restart: "no"
     # The image's healthcheck probes a Synapse this container does not run
     healthcheck:
