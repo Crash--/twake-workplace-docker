@@ -46,7 +46,23 @@ export TWAKE_SPACE_APPSERVICE=""
 if [ -n "${TWAKE_SPACE_MATRIX_AS_TOKEN:-}" ]; then
   TWAKE_SPACE_APPSERVICE="  - /config/twake-space-registration.yaml"
 fi
-envsubst '$BASE_DOMAIN $LDAP_BASE_DN $TWAKE_SPACE_APPSERVICE' < ./synapse/homeserver-postgres.yaml.template > ./synapse/homeserver-postgres.yaml
+# Same for the call tokens of Twake Chat (twake-chat-visio-side-service): Chat
+# finds the service in the well-known, and the service checks the callers'
+# membership with is_joined.
+envsubst '$TWAKE_CHAT_VISIO_AS_TOKEN $TWAKE_CHAT_VISIO_HS_TOKEN' < ./synapse/twake-chat-visio-registration.yaml.template > ./synapse/twake-chat-visio-registration.yaml
+export TWAKE_CHAT_VISIO_APPSERVICE="" TWAKE_CHAT_VISIO_CONFIG=""
+if [ -n "${TWAKE_CHAT_VISIO_AS_TOKEN:-}" ]; then
+  TWAKE_CHAT_VISIO_APPSERVICE="  - /config/twake-chat-visio-registration.yaml"
+  TWAKE_CHAT_VISIO_CONFIG="experimental_features:
+  msc4502_enabled: true # is_joined for application services
+# livekit_base_url for Twake Chat Flutter, livekit_service_url (MSC4195) for the others
+extra_well_known_client_content:
+  org.matrix.msc4143.rtc_foci:
+    - type: livekit
+      livekit_base_url: https://matrix-rtc.${BASE_DOMAIN}
+      livekit_service_url: https://matrix-rtc.${BASE_DOMAIN}"
+fi
+envsubst '$BASE_DOMAIN $LDAP_BASE_DN $TWAKE_SPACE_APPSERVICE $TWAKE_CHAT_VISIO_APPSERVICE $TWAKE_CHAT_VISIO_CONFIG' < ./synapse/homeserver-postgres.yaml.template > ./synapse/homeserver-postgres.yaml
 
 # Check if file was created
 if [ ! -f "./synapse/homeserver-postgres.yaml" ]; then
@@ -77,4 +93,13 @@ fi
 fi
 
 # Pass all arguments to docker compose
-sudo docker compose --env-file ../.env "$@"
+FILES=()
+if [ -n "${TWAKE_CHAT_VISIO_AS_TOKEN:-}" ]; then
+  FILES=(-f docker-compose.yaml -f docker-compose.visio.yaml)
+  # Any -f turns off the automatic override file: keep it
+  for OVERRIDE in docker-compose.override.yml docker-compose.override.yaml; do
+    if [ -f "$OVERRIDE" ]; then FILES+=(-f "$OVERRIDE"); fi
+  done
+fi
+
+sudo docker compose --env-file ../.env "${FILES[@]}" "$@"

@@ -31,6 +31,7 @@ services:
       - ./synapse/matrix.log.config:/config/matrix.log.config:ro
       - ./tom-bridge/registration.yaml:/config/tom-bridge-registration.yaml:ro
       - ./synapse/twake-space-registration.yaml:/config/twake-space-registration.yaml:ro
+      - ./synapse/twake-chat-visio-registration.yaml:/config/twake-chat-visio-registration.yaml:ro
       - ../twake_auth/traefik/ssl/root-ca.crt:/usr/local/share/ca-certificates/root-ca.crt:ro
     networks:
       - twake-network
