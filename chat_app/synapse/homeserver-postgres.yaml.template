@@ -11,6 +11,9 @@
 # https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html
 server_name: "${BASE_DOMAIN}"
 public_baseurl: "https://matrix.${BASE_DOMAIN}/"
+# Not 12 (the default since 1.162): tom-bridge lists its bot, the room creator,
+# in power_levels.users, which v12 rooms refuse
+default_room_version: "11"
 
 pid_file: /data/homeserver.pid
 
