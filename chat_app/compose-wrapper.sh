@@ -39,14 +39,7 @@ else
 fi
 export TOM_BRIDGE_AS_TOKEN TOM_BRIDGE_HS_TOKEN
 envsubst '$TOM_BRIDGE_AS_TOKEN $TOM_BRIDGE_HS_TOKEN $BASE_DOMAIN_REGEX' < ./tom-bridge/registration.yaml.template > ./tom-bridge/registration.yaml
-# The Twake Space backend shares these tokens through the root .env; Synapse
-# loads its registration only when they are set (Chat tab of Twake Space)
-envsubst '$TWAKE_SPACE_MATRIX_AS_TOKEN $TWAKE_SPACE_MATRIX_HS_TOKEN $BASE_DOMAIN_REGEX' < ./synapse/twake-space-registration.yaml.template > ./synapse/twake-space-registration.yaml
-export TWAKE_SPACE_APPSERVICE=""
-if [ -n "${TWAKE_SPACE_MATRIX_AS_TOKEN:-}" ]; then
-  TWAKE_SPACE_APPSERVICE="  - /config/twake-space-registration.yaml"
-fi
-envsubst '$BASE_DOMAIN $LDAP_BASE_DN $TWAKE_SPACE_APPSERVICE' < ./synapse/homeserver-postgres.yaml.template > ./synapse/homeserver-postgres.yaml
+envsubst '$BASE_DOMAIN $LDAP_BASE_DN' < ./synapse/homeserver-postgres.yaml.template > ./synapse/homeserver-postgres.yaml
 
 # Check if file was created
 if [ ! -f "./synapse/homeserver-postgres.yaml" ]; then

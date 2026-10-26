@@ -65,20 +65,19 @@ are not either. As a result:
   `tmail_app/config/cassandra.properties`.
 - Chat: `/embed/rooms/<Matrix space id>` of the React Twake Chat. Set
   `TWAKE_SPACE_CHAT_URL` to that app, or the tab says Chat is not set up. The
-  backend reads the room events through a Synapse application service: uncomment
-  `TWAKE_SPACE_MATRIX_*` and `TWAKE_SPACE_SECRETS_KEY` in `.env` with your own
-  values. Without them Synapse does not load it and the backend leaves chat out.
+  `MATRIX_*` settings of the backend turn the tab on, and tom-bridge gives the
+  ids of the Matrix spaces.
   - tom-bridge creates the Matrix space of each space and its General room
     ([linagora/ToM-Bridge#10](https://github.com/linagora/ToM-Bridge/pull/10),
     not released): set `TOM_BRIDGE_SPACES=true` and `TOM_BRIDGE_IMAGE` to an
     image that has it. Its registration reserves the `#twake-space-*` aliases.
-  - The backend gets the events of the rooms with those aliases, and posts as
-    `@twakespace`, the account tom-bridge adds to each Matrix space.
-    `twake-space-init` (space_app) registers that account on each `up`, since
-    neither Synapse nor tom-bridge creates it; the backend waits for it to
-    succeed.
-  - Synapse reads the registrations at startup only: after changing these
-    settings on a running stack, restart it (`docker restart chat_app-synapse-1`).
+  - tom-bridge also adds `@twakespace` (its `twakeSpaceUserId`) to each Matrix
+    space. On a new stack nothing creates that account: tom-bridge logs at error
+    level that it cannot join, and the members still get the space. On a stack
+    that ran the former Twake Space application service, the account still
+    exists and joins each new space at power level 50. Deactivating it is an
+    option, with an admin token:
+    `POST /_synapse/admin/v1/deactivate/@twakespace:${BASE_DOMAIN}`.
 - Drive: each person's Drive (`<slug>-drive.${BASE_DOMAIN}`), which Twake
   Space may frame (`CSP_FRAME_SRC`).
 
